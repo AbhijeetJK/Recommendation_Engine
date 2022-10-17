@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import ast as at
 
-movie_data1 = pd.read_csv('C:\\Users\\hp\\Desktop\\IIT Madras Assignments\\Recommendation_system\\Recommadation_System_full_project\\tmdb_5000_movies.csv')
-cast = pd.read_csv('C:\\Users\\hp\\Desktop\\IIT Madras Assignments\\Recommendation_system\\Recommadation_System_full_project\\tmdb_5000_credits.csv')
+movie_data1 = pd.read_csv('C:\\Users\\hp\\Desktop\\Recommadation_System_full_project\\tmdb_5000_movies.csv')
+cast = pd.read_csv('C:\\Users\\hp\\Desktop\\Recommendation_system\\Recommadation_System_full_project\\tmdb_5000_credits.csv')
 
 print(movie_data1.head(1))
 print(cast.head(1)['cast'])
@@ -78,7 +78,7 @@ movie_data['crew'] = movie_data['crew'].apply(Extract_info_crew)
 movie_data['overview'] = movie_data['overview'].apply(lambda x:x.split())
 #print("Overvire",movie_data['overview'][0])
 
-## we will remove to spaces between 2 words in genres casr crew column
+## we will remove  spaces between 2 words in genres casr crew column
 
 movie_data['genres'] = movie_data['genres'].apply(lambda x :[i.replace(" ","") for i in x ] )
 movie_data['keywords'] = movie_data['keywords'].apply(lambda x :[i.replace(" ","") for i in x ] )
@@ -88,25 +88,20 @@ movie_data['crew'] = movie_data['crew'].apply(lambda x :[i.replace(" ","") for i
 # concantinate all 4 string coulmn to 1
 movie_data['Movie_info'] = movie_data['overview'] + movie_data['genres'] + movie_data['keywords'] + movie_data['cast'] + movie_data['crew']
 
-# New DF
-#Movie_detailes = pd.DataFrame([movie_data['id'],movie_data['title'],movie_data['genres'],movie_data['cast'],movie_data['crew'],movie_data['release_date']],
-                              #columns=['movie_id','movie_name','movie_type','Actors','movie_direcor'],)
 
 movie_data['release_date'] = pd.DatetimeIndex(movie_data['release_date']).year
 
 Movie_info = movie_data[['id','title','genres','cast','crew','vote_average','release_date']]
 print(type(Movie_info['release_date']))
-#movie_detailes = pd.DataFrame(Movie_info,columns=['movie_id','movie_name','movie_type','movie_actors','movie_director','movie_release_date'])
-print(Movie_info.head(5))
 #creating new DF with 4 columns
 movie_data_info = movie_data[['id','title','vote_average','release_date','Movie_info']]
-#print(movie_data_info['Movie_info'][0])
+
 
 # convert Movie info coulnm to String
 
 movie_data_info['Movie_info'] = movie_data_info['Movie_info'].apply(lambda x:" ".join(x))
 
-# make all word lower case in Movie info coulmn
+# make all word in lower case of Movie info coulmn
 movie_data_info['Movie_info'] = movie_data_info['Movie_info'].apply(lambda x:x.lower())
 
 ## Now we have data with proper format now lets convert all String data into Vector using Text Vectorization Techniques.
@@ -117,11 +112,9 @@ cv = CountVectorizer(max_features=5000,stop_words='english')
 vectors = cv.fit_transform(movie_data_info['Movie_info']).toarray()
 print(vectors[0])
 
-# to check features name of respected vector
-#print(cv.get_feature_names())
 
-# Now to Avoid duplicated word or same Words with extra Alphaet like love,lovely,loving there should only 1 word love.
-# that is why we used stemming techniques of NLP
+
+# here we used stemming techniques of NLP
 from nltk.stem.porter import PorterStemmer
 ps = PorterStemmer()
 def stemmer(movie_info):
@@ -133,12 +126,12 @@ def stemmer(movie_info):
 movie_data_info['Movie_info'] = movie_data_info['Movie_info'].apply(stemmer)
 #print(movie_data_info.info())
 
-# Now we need calculate similarity between movies using cosine similarity techniques
+# here we  calculate similarity between movies using cosine similarity techniques
 from sklearn.metrics.pairwise import cosine_similarity
 similarity = cosine_similarity(vectors)
 #print(similarity)
 
-# Now we  want to calculate first 5 movie to recommanded user select Movie
+# Now we  want to calculate first 5 movies based on user selected movie
 
 
 def recommandations(movie):
@@ -168,13 +161,13 @@ def recommandations(movie):
 year_bases_recommandationes('Batman Begins')'''
 
 
-#recommandations('Batman Begins')
-print(movie_data_info)
-#Website Part
+recommandations('Batman Begins')
+
+
 # Now we have to send Movie fileto website code so that we used pickel
 import pickle as pk
 
-pk.dump(movie_data_info.to_dict(),open('C:\\Users\\hp\\PycharmProjects\\untitled4\\Recomandation_System\\movie.pkl','wb'))
-#pk.dump(similarity,open('C:\\Users\\hp\\PycharmProjects\\untitled4\\Recomandation_System\\similarity.pkl','wb'))
+pk.dump(movie_data_info.to_dict(),open('C:\\Users\\hp\\PycharmProjects\\Recomandation_System\\movie.pkl','wb'))
+pk.dump(similarity,open('C:\\Users\\hp\\PycharmProjects\\Recomandation_System\\similarity.pkl','wb'))
 
 
